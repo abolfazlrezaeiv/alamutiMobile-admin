@@ -16,9 +16,9 @@ class AdvertisementProvider {
       Get.put(MyAdvertisementController());
 
   Future<void> rejectAdvertisement(int id) async {
-    for (var i = 0; i < listAdvertisementController.adsList.value.length; i++) {
+    for (var i = 0; i < listAdvertisementController.adsList.length; i++) {
       if (listAdvertisementController.adsList[i].id == id) {
-        listAdvertisementController.adsList.value.removeAt(i);
+        listAdvertisementController.adsList.removeAt(i);
         break;
       }
     }
@@ -26,9 +26,9 @@ class AdvertisementProvider {
   }
 
   Future<void> changeToPublish(int id) async {
-    for (var i = 0; i < listAdvertisementController.adsList.value.length; i++) {
+    for (var i = 0; i < listAdvertisementController.adsList.length; i++) {
       if (listAdvertisementController.adsList[i].id == id) {
-        listAdvertisementController.adsList.value.removeAt(i);
+        listAdvertisementController.adsList.removeAt(i);
         break;
       }
     }

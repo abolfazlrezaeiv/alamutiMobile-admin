@@ -103,8 +103,7 @@ class AdsDetail extends StatelessWidget {
                               '$price   تومان',
                               textDirection: TextDirection.ltr,
                               style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width / 26,
+                                  fontSize: Get.width / 26,
                                   fontFamily: 'IRANSansXFaNum',
                                   fontWeight: FontWeight.w400),
                             ),
@@ -113,8 +112,7 @@ class AdsDetail extends StatelessWidget {
                               textDirection: TextDirection.rtl,
                               style: TextStyle(
                                   fontWeight: FontWeight.w300,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width / 27),
+                                  fontSize: Get.width / 27),
                             )
                           ],
                         ),
@@ -134,7 +132,7 @@ class AdsDetail extends StatelessWidget {
                       'توضیحات',
                       style: TextStyle(
                           fontWeight: FontWeight.w500,
-                          fontSize: MediaQuery.of(context).size.width / 24),
+                          fontSize: Get.width / 24),
                     ),
                     SizedBox(
                       height: Get.height / 55,
@@ -148,7 +146,7 @@ class AdsDetail extends StatelessWidget {
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
                           fontWeight: FontWeight.w300,
-                          fontSize: MediaQuery.of(context).size.width / 28,
+                          fontSize: Get.width / 28,
                         ),
                       ),
                     ),
@@ -171,7 +169,6 @@ class AdsDetail extends StatelessWidget {
                   color: Colors.red.withOpacity(0.7),
                   onPressed: () {
                     advertisementProvider.rejectAdvertisement(this.adsId);
-                    advertisementProvider.getAllUnpublished();
 
                     Get.to(() => HomePage());
                   },
@@ -179,7 +176,7 @@ class AdsDetail extends StatelessWidget {
                     'رد کردن',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      fontSize: MediaQuery.of(context).size.width / 26,
+                      fontSize: Get.width / 26,
                     ),
                   ),
                 ),
@@ -191,13 +188,12 @@ class AdsDetail extends StatelessWidget {
                   onPressed: () {
                     advertisementProvider.changeToPublish(this.adsId);
                     Get.to(() => HomePage());
-                    advertisementProvider.getAllUnpublished();
                   },
                   child: Text(
                     'تایید',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      fontSize: MediaQuery.of(context).size.width / 26,
+                      fontSize: Get.width / 26,
                     ),
                   ),
                 ),

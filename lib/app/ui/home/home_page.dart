@@ -17,24 +17,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int selectedTap = 4;
-  bool isTyping = false;
+  var selectedTap = 4;
+  var isTyping = false;
   var ap = AdvertisementProvider();
 
   List<Advertisement> adsList = [];
 
-  ConnectionController connectionController = Get.put(ConnectionController());
+  var connectionController = Get.put(ConnectionController());
 
-  ScreenController screenController = Get.put(ScreenController());
+  var screenController = Get.put(ScreenController());
 
-  ListAdvertisementController listAdvertisementController =
-      Get.put(ListAdvertisementController());
+  var listAdvertisementController = Get.put(ListAdvertisementController());
 
   @override
   void initState() {
     super.initState();
-
-    ap.getAllUnpublished();
 
     connectionController.checkConnectionStatus();
   }
@@ -42,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   int tag = 0;
   @override
   Widget build(BuildContext context) {
+    ap.getAllUnpublished();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.update),
@@ -59,62 +57,87 @@ class _HomePageState extends State<HomePage> {
           ? Center(
               child: Text('لطفا اتصال به اینترنت همراه خود را بررسی کنید'),
             )
-          : Obx(() => ListView.builder(
-                itemCount: listAdvertisementController.adsList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height / 5,
-                    child: GestureDetector(
-                      onTap: () => Get.to(
-                          () => AdsDetail(
-                                adsId: listAdvertisementController
-                                    .adsList[index].id,
-                                byteImage1: listAdvertisementController
-                                    .adsList[index].photo1,
-                                byteImage2: listAdvertisementController
-                                    .adsList[index].photo2,
-                                price: listAdvertisementController
-                                    .adsList[index].price
-                                    .toString(),
-                                sendedDate: listAdvertisementController
-                                    .adsList[index].datePosted,
-                                title: listAdvertisementController
-                                    .adsList[index].title,
-                                userId: listAdvertisementController
-                                    .adsList[index].userId,
-                                description: listAdvertisementController
-                                    .adsList[index].description,
-                              ),
-                          transition: Transition.noTransition),
-                      child: Obx(() => Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Colors.grey.withOpacity(0.3),
+          : Obx(() => RefreshIndicator(
+                onRefresh: () {
+                  return ap.getAllUnpublished();
+                },
+                child: ListView.builder(
+                  itemCount: listAdvertisementController.adsList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: MediaQuery.of(context).size.height / 5,
+                      child: GestureDetector(
+                        onTap: () => Get.to(
+                            () => AdsDetail(
+                                  adsId: listAdvertisementController
+                                      .adsList[index].id,
+                                  byteImage1: listAdvertisementController
+                                      .adsList[index].photo1,
+                                  byteImage2: listAdvertisementController
+                                      .adsList[index].photo2,
+                                  price: listAdvertisementController
+                                      .adsList[index].price
+                                      .toString(),
+                                  sendedDate: listAdvertisementController
+                                      .adsList[index].datePosted,
+                                  title: listAdvertisementController
+                                      .adsList[index].title,
+                                  userId: listAdvertisementController
+                                      .adsList[index].userId,
+                                  description: listAdvertisementController
+                                      .adsList[index].description,
+                                ),
+                            transition: Transition.noTransition),
+                        child: Obx(() => Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Colors.grey.withOpacity(0.3),
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        MediaQuery.of(context).size.width / 50),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    FittedBox(
-                                      fit: BoxFit.cover,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: (listAdvertisementController
-                                                    .adsList[index].photo1 ==
-                                                null)
-                                            ? Opacity(
-                                                opacity: 0.6,
-                                                child: Image.asset(
-                                                  'assets/logo/no-image.png',
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width /
+                                              50),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.cover,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: (listAdvertisementController
+                                                      .adsList[index].photo1 ==
+                                                  null)
+                                              ? Opacity(
+                                                  opacity: 0.6,
+                                                  child: Image.asset(
+                                                    'assets/logo/no-image.png',
+                                                    fit: BoxFit.cover,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            6,
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            6,
+                                                  ),
+                                                )
+                                              : Image.memory(
+                                                  base64Decode(
+                                                    listAdvertisementController
+                                                        .adsList[index].photo1,
+                                                  ),
                                                   fit: BoxFit.cover,
                                                   height: MediaQuery.of(context)
                                                           .size
@@ -125,77 +148,62 @@ class _HomePageState extends State<HomePage> {
                                                           .height /
                                                       6,
                                                 ),
-                                              )
-                                            : Image.memory(
-                                                base64Decode(
-                                                  listAdvertisementController
-                                                      .adsList[index].photo1,
-                                                ),
-                                                fit: BoxFit.cover,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    6,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    6,
-                                              ),
+                                        ),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              70),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            listAdvertisementController
-                                                .adsList[index].title,
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 15),
-                                            textDirection: TextDirection.rtl,
-                                          ),
-                                          SizedBox(
-                                            height: MediaQuery.of(context)
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: MediaQuery.of(context)
                                                     .size
                                                     .height /
-                                                18,
-                                          ),
-                                          Text(
-                                            '${listAdvertisementController.adsList[index].price.toString()}  تومان',
-                                            style: TextStyle(
-                                                fontFamily: 'IRANSansXFaNum',
-                                                fontWeight: FontWeight.w300),
-                                            textDirection: TextDirection.rtl,
-                                          ),
-                                          Text(
-                                            listAdvertisementController
-                                                .adsList[index].datePosted,
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w200,
-                                                fontFamily: 'IRANSansXFaNum',
-                                                fontSize: 13),
-                                            textDirection: TextDirection.rtl,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
+                                                70),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              listAdvertisementController
+                                                  .adsList[index].title,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 15),
+                                              textDirection: TextDirection.rtl,
+                                            ),
+                                            SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  18,
+                                            ),
+                                            Text(
+                                              '${listAdvertisementController.adsList[index].price.toString()}  تومان',
+                                              style: TextStyle(
+                                                  fontFamily: 'IRANSansXFaNum',
+                                                  fontWeight: FontWeight.w300),
+                                              textDirection: TextDirection.rtl,
+                                            ),
+                                            Text(
+                                              listAdvertisementController
+                                                  .adsList[index].datePosted,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w200,
+                                                  fontFamily: 'IRANSansXFaNum',
+                                                  fontSize: 13),
+                                              textDirection: TextDirection.rtl,
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          )),
-                    ),
-                  );
-                },
+                            )),
+                      ),
+                    );
+                  },
+                ),
               )),
     );
   }
