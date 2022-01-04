@@ -8,12 +8,13 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/utils.dart';
 
 class AdvertisementProvider {
-  TokenProvider tokenProvider = Get.put(TokenProvider());
-  AdsFormController adsFormController = Get.put(AdsFormController());
-  ListAdvertisementController listAdvertisementController =
-      Get.put(ListAdvertisementController());
-  MyAdvertisementController myAdvertisementController =
-      Get.put(MyAdvertisementController());
+  var tokenProvider = Get.put(TokenProvider());
+
+  var adsFormController = Get.put(AdsFormController());
+
+  var listAdvertisementController = Get.put(ListAdvertisementController());
+
+  var myAdvertisementController = Get.put(MyAdvertisementController());
 
   Future<void> rejectAdvertisement(int id) async {
     for (var i = 0; i < listAdvertisementController.adsList.length; i++) {
@@ -32,8 +33,9 @@ class AdvertisementProvider {
         break;
       }
     }
+
     await tokenProvider.api
-        .put(baseUrl + 'Advertisement/changeTopublished/$id');
+        .put(baseUrl + 'Advertisement/changeToPublished/$id');
   }
 
   Future<List<Advertisement>> getUserAdvertisement(String userId) async {

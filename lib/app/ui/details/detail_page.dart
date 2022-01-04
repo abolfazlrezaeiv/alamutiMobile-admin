@@ -31,7 +31,7 @@ class AdsDetail extends StatelessWidget {
       required this.adsId})
       : super(key: key);
 
-  AdvertisementProvider advertisementProvider = AdvertisementProvider();
+  var advertisementProvider = AdvertisementProvider();
   var ap = AdvertisementProvider();
   @override
   Widget build(BuildContext context) {
@@ -185,7 +185,7 @@ class AdsDetail extends StatelessWidget {
                   minWidth: Get.width / 2.2,
                   elevation: 0,
                   color: Colors.greenAccent,
-                  onPressed: () {
+                  onPressed: () async {
                     advertisementProvider.changeToPublish(this.adsId);
                     Get.to(() => HomePage());
                   },
