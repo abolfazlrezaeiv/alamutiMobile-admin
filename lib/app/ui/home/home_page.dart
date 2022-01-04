@@ -57,7 +57,8 @@ class _HomePageState extends State<HomePage> {
           ? Center(
               child: Text('لطفا اتصال به اینترنت همراه خود را بررسی کنید'),
             )
-          : Obx(() => RefreshIndicator(
+          : Obx(
+              () => RefreshIndicator(
                 onRefresh: () {
                   return ap.getAllUnpublished();
                 },
@@ -88,123 +89,105 @@ class _HomePageState extends State<HomePage> {
                                       .adsList[index].description,
                                 ),
                             transition: Transition.noTransition),
-                        child: Obx(() => Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey.withOpacity(0.3),
-                                  ),
+                        child: Obx(
+                          () => Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.grey.withOpacity(0.3),
                                 ),
                               ),
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal:
-                                          MediaQuery.of(context).size.width /
-                                              50),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      FittedBox(
-                                        fit: BoxFit.cover,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: (listAdvertisementController
-                                                      .adsList[index].photo1 ==
-                                                  null)
-                                              ? Opacity(
-                                                  opacity: 0.6,
-                                                  child: Image.asset(
-                                                    'assets/logo/no-image.png',
-                                                    fit: BoxFit.cover,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height /
-                                                            6,
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height /
-                                                            6,
-                                                  ),
-                                                )
-                                              : Image.memory(
-                                                  base64Decode(
-                                                    listAdvertisementController
-                                                        .adsList[index].photo1,
-                                                  ),
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: Get.width / 50),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    FittedBox(
+                                      fit: BoxFit.cover,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: (listAdvertisementController
+                                                    .adsList[index].photo1 ==
+                                                null)
+                                            ? Opacity(
+                                                opacity: 0.6,
+                                                child: Image.asset(
+                                                  'assets/logo/no-image.png',
                                                   fit: BoxFit.cover,
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height /
-                                                      6,
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .height /
-                                                      6,
+                                                  height: Get.height / 6,
+                                                  width: Get.height / 6,
                                                 ),
-                                        ),
+                                              )
+                                            : Image.memory(
+                                                base64Decode(
+                                                  listAdvertisementController
+                                                      .adsList[index].photo1,
+                                                ),
+                                                fit: BoxFit.cover,
+                                                height: Get.height / 6,
+                                                width: Get.height / 6,
+                                              ),
                                       ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                70),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: Get.height / 70),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
                                               listAdvertisementController
                                                   .adsList[index].title,
                                               style: TextStyle(
                                                   fontWeight: FontWeight.w400,
                                                   fontSize: 15),
                                               textDirection: TextDirection.rtl,
+                                              overflow: TextOverflow.visible,
                                             ),
-                                            SizedBox(
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  18,
-                                            ),
-                                            Text(
-                                              '${listAdvertisementController.adsList[index].price.toString()}  تومان',
-                                              style: TextStyle(
-                                                  fontFamily: 'IRANSansXFaNum',
-                                                  fontWeight: FontWeight.w300),
-                                              textDirection: TextDirection.rtl,
-                                            ),
-                                            Text(
-                                              listAdvertisementController
-                                                  .adsList[index].datePosted,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w200,
-                                                  fontFamily: 'IRANSansXFaNum',
-                                                  fontSize: 13),
-                                              textDirection: TextDirection.rtl,
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                          ),
+                                          SizedBox(
+                                            height: Get.height / 18,
+                                          ),
+                                          Text(
+                                            '${listAdvertisementController.adsList[index].price.toString()}  تومان',
+                                            style: TextStyle(
+                                                fontFamily: 'IRANSansXFaNum',
+                                                fontWeight: FontWeight.w300),
+                                            textDirection: TextDirection.rtl,
+                                          ),
+                                          Text(
+                                            listAdvertisementController
+                                                .adsList[index].datePosted,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w200,
+                                                fontFamily: 'IRANSansXFaNum',
+                                                fontSize: 13),
+                                            textDirection: TextDirection.rtl,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
-                            )),
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   },
                 ),
-              )),
+              ),
+            ),
     );
   }
 }
