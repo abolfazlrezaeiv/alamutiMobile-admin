@@ -1,3 +1,3 @@
-var baseUrl = 'http://192.168.1.103:5113/api/';
-var baseLoginUrl = 'http://192.168.1.103:5113/';
-var baseChatUrl = 'http://192.168.1.103:5113/';
+var baseUrl = 'https://alamuti.ir/api/';
+var baseLoginUrl = 'https://alamuti.ir/';
+var baseChatUrl = 'https://alamuti.ir/';
