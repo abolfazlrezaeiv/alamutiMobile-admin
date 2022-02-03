@@ -1,106 +1,220 @@
-import 'package:alamuti/app/controller/adsFormController.dart';
-import 'package:alamuti/app/controller/advertisementController.dart';
-import 'package:alamuti/app/controller/myAdvertisementController.dart';
-import 'package:alamuti/app/data/model/Advertisement.dart';
-import 'package:alamuti/app/data/provider/token_provider.dart';
-import 'package:alamuti/app/data/provider/base_url.dart';
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:admin_alamuti/app/controller/detail_page_advertisement.dart';
+import 'package:admin_alamuti/app/data/model/Advertisement.dart';
+import 'package:admin_alamuti/app/data/model/list_page.dart';
+import 'package:admin_alamuti/app/data/provider/token_provider.dart';
+import 'package:admin_alamuti/app/data/provider/base_url.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/utils.dart';
 
 class AdvertisementProvider {
   var tokenProvider = Get.put(TokenProvider());
-
-  var adsFormController = Get.put(AdsFormController());
-
-  var listAdvertisementController = Get.put(ListAdvertisementController());
-
-  var myAdvertisementController = Get.put(MyAdvertisementController());
+  List<Advertisement> advertisementList = [];
 
   Future<void> rejectAdvertisement(int id) async {
-    for (var i = 0; i < listAdvertisementController.adsList.length; i++) {
-      if (listAdvertisementController.adsList[i].id == id) {
-        listAdvertisementController.adsList.removeAt(i);
-        break;
-      }
-    }
     await tokenProvider.api.delete(baseUrl + 'Advertisement/unpublished/$id');
   }
 
   Future<void> changeToPublish(int id) async {
-    for (var i = 0; i < listAdvertisementController.adsList.length; i++) {
-      if (listAdvertisementController.adsList[i].id == id) {
-        listAdvertisementController.adsList.removeAt(i);
-        break;
-      }
-    }
-
     await tokenProvider.api
         .put(baseUrl + 'Advertisement/changeToPublished/$id');
   }
 
-  Future<List<Advertisement>> getUserAdvertisement(String userId) async {
-    var response;
+  Future<void> getDetails(
+      {required BuildContext context, required int id}) async {
+    final DetailPageController detailPageController =
+        Get.put(DetailPageController());
 
-    response = await tokenProvider.api
-        .get(baseUrl + 'Advertisement/getUnpublishedUserAds/$userId');
+    showLoaderDialog(context);
 
-    var myMap = response.data;
-    List<Advertisement> myads = [];
-    myMap.forEach(
-      (element) {
-        myads.add(
-          Advertisement(
-            id: element['id'],
-            title: element['title'],
-            description: element['description'],
-            datePosted: element['daySended'],
-            price: element['price'].toString(),
-            photo1: element['photo1'],
-            photo2: element['photo2'],
-            area: element['area'].toString(),
-            userId: element['userId'],
-            adsType: element['adsType'],
-            published: element['published'],
-          ),
-        );
-      },
-    );
+    var response = await tokenProvider.api
+        .get(baseUrl + 'Advertisement/$id')
+        .whenComplete(() => Get.back());
 
-    listAdvertisementController.adsList.value = myads;
-
-    return myads;
+    if (response.statusCode == 200) {
+      detailPageController.details.value = [
+        Advertisement.fromJson(response.data)
+      ];
+    } else {}
   }
 
-  Future<List<Advertisement>> getAllUnpublished() async {
-    var response;
+  Future<ListPage<Advertisement>> getUserAdvertisement({
+    int number = 1,
+    int size = 10,
+    required String userId,
+  }) async {
+    advertisementList = [];
+    var response = await tokenProvider.api
+        .get(baseUrl +
+            'Advertisement/adminpaneluseradvertisement?userId=$userId&PageNumber=$number&PageSize=$size')
+        .timeout(Duration(seconds: 5));
 
-    response =
-        await tokenProvider.api.get(baseUrl + 'Advertisement/getUnpublished');
+    var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
+    print(xPagination);
 
-    var myMap = response.data;
-    List<Advertisement> myads = [];
-    myMap.forEach(
-      (element) {
-        myads.add(
-          Advertisement(
-            id: element['id'],
-            title: element['title'],
-            description: element['description'],
-            datePosted: element['daySended'],
-            price: element['price'].toString(),
-            photo1: element['photo1'],
-            photo2: element['photo2'],
-            area: element['area'].toString(),
-            userId: element['userId'],
-            adsType: element['adsType'],
-            published: element['published'],
-          ),
+    response.data.forEach(
+        (element) => advertisementList.add(Advertisement.fromJson(element)));
+
+    return ListPage(
+        itemList: advertisementList,
+        grandTotalCount: xPagination['TotalCount']);
+  }
+
+  Future<ListPage<Advertisement>> getAllUnpublished({
+    int number = 1,
+    int size = 10,
+    String? adstype,
+  }) async {
+    advertisementList = [];
+
+    Response response;
+
+    try {
+      response = await tokenProvider.api
+          .get(baseUrl +
+              'Advertisement/getUnpublished?pageNumber=$number&pageSize=$size')
+          .timeout(Duration(seconds: 7));
+
+      var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
+      print(xPagination);
+
+      if (response.statusCode == 200) {
+        response.data.forEach(
+          (element) {
+            advertisementList.add(Advertisement.fromJson(element));
+          },
         );
-      },
+
+        return ListPage(
+            itemList: advertisementList,
+            grandTotalCount: xPagination['TotalCount']);
+      } else {
+        return ListPage(
+            itemList: advertisementList,
+            grandTotalCount: xPagination['TotalCount']);
+      }
+    } on TimeoutException catch (_) {
+      throw TimeoutException('');
+    }
+  }
+
+  Future<ListPage<Advertisement>> getReports({
+    int number = 1,
+    int size = 10,
+    String? adstype,
+  }) async {
+    advertisementList = [];
+
+    Response response;
+
+    try {
+      response = await tokenProvider.api
+          .get(baseUrl +
+              'Advertisement/report?pageNumber=$number&pageSize=$size')
+          .timeout(Duration(seconds: 6));
+
+      var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
+      print(xPagination);
+
+      if (response.statusCode == 200) {
+        response.data.forEach(
+          (element) {
+            advertisementList.add(Advertisement.fromJson(element));
+          },
+        );
+
+        return ListPage(
+            itemList: advertisementList,
+            grandTotalCount: xPagination['TotalCount']);
+      } else {
+        return ListPage(
+            itemList: advertisementList,
+            grandTotalCount: xPagination['TotalCount']);
+      }
+    } on TimeoutException catch (_) {
+      throw TimeoutException('');
+    }
+  }
+
+  Future<void> clearReport({
+    required BuildContext context,
+    required int id,
+  }) async {
+    var response = await tokenProvider.api.put(
+      baseUrl + 'Advertisement/report/$id',
     );
+    print('object');
+    if (response.statusCode == 200) {
+      var message = 'گزارش پاک شد و آگهی به منتشر شد.';
+      showStatusDialog(context: context, message: message);
+    } else {
+      var message = 'ارتباط ناموفق بود لطفا دوباره امتحان کنید';
+      showStatusDialog(context: context, message: message);
+    }
+  }
 
-    listAdvertisementController.adsList.value = myads;
+  showLoaderDialog(context) {
+    AlertDialog alert = AlertDialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: new Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: Colors.greenAccent,
+          ),
+        ],
+      ),
+    );
+    showDialog(
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      context: context,
+    );
+  }
 
-    return myads;
+  showStatusDialog({required context, required String message}) {
+    AlertDialog alert = AlertDialog(
+      backgroundColor: Colors.white,
+      elevation: 3,
+      content: Text(
+        message,
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: Get.width / 25,
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Get.back(closeOverlays: true);
+            },
+            child: Text(
+              'تایید',
+              style: TextStyle(
+                color: Colors.greenAccent,
+                fontWeight: FontWeight.w400,
+                fontSize: Get.width / 27,
+              ),
+            ))
+      ],
+    );
+    showDialog(
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      context: context,
+    );
   }
 }

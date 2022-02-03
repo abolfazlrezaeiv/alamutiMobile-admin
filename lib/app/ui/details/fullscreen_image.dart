@@ -9,13 +9,13 @@ class FullscreenImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black,
       ),
       backgroundColor: Colors.black,
       body: Center(
         child: Image.memory(
           base64Decode(image),
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           width: double.infinity,
         ),
       ),

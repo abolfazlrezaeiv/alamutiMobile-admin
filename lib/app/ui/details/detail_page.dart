@@ -1,209 +1,268 @@
 import 'dart:convert';
-import 'package:alamuti/app/data/provider/advertisement_provider.dart';
-import 'package:alamuti/app/ui/details/fullscreen_image.dart';
-import 'package:alamuti/app/ui/home/home_page.dart';
-import 'package:alamuti/app/ui/user_advertisement/user_ads.dart';
+import 'package:admin_alamuti/app/controller/detail_page_advertisement.dart';
+import 'package:admin_alamuti/app/data/provider/advertisement_provider.dart';
+import 'package:admin_alamuti/app/ui/details/fullscreen_image.dart';
+import 'package:admin_alamuti/app/ui/details/fullscreen_slider.dart';
+import 'package:admin_alamuti/app/ui/home/home_page.dart';
+import 'package:admin_alamuti/app/ui/user_advertisement/user_ads.dart';
+import 'package:admin_alamuti/app/ui/widgets/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
-// ignore: must_be_immutable
-class AdsDetail extends StatelessWidget {
-  final String? byteImage1;
-  final String? byteImage2;
-  final String title;
-  final String price;
-  final String sendedDate;
-  final String userId;
-  final int adsId;
+class AdsDetail extends StatefulWidget {
+  final int id;
 
-  final String description;
-  AdsDetail(
-      {Key? key,
-      required this.byteImage1,
-      required this.byteImage2,
-      required this.title,
-      required this.price,
-      required this.description,
-      required this.userId,
-      required this.sendedDate,
-      required this.adsId})
-      : super(key: key);
+  AdsDetail({
+    Key? key,
+    required this.id,
+  }) : super(key: key);
 
-  var advertisementProvider = AdvertisementProvider();
-  var ap = AdvertisementProvider();
+  @override
+  State<AdsDetail> createState() => _AdsDetailState();
+}
+
+class _AdsDetailState extends State<AdsDetail> {
+  final DetailPageController detailPageController = Get.find();
+
+  final double width = Get.width;
+
+  final double height = Get.height;
+
+  final AdvertisementProvider advertisementProvider = AdvertisementProvider();
+
+  final GetStorage storage = GetStorage();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              ((byteImage1 != null) && (byteImage2 != null))
-                  ? getImageSlider()
-                  : getImageOrEmpty(),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Get.width / 50,
+      resizeToAvoidBottomInset: false,
+      body: Obx(
+        () => Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                ((detailPageController.details[0].photo1 != null) &&
+                        (detailPageController.details[0].photo2 != null))
+                    ? getImageSlider()
+                    : getImageOrEmpty(),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: width / 20,
+                  ),
+                  child: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: height / 55,
+                          ),
+                          child: Text(
+                            detailPageController.details[0].title,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: width / 24),
+                            textDirection: TextDirection.rtl,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                                onTap: () {
+                                  print(detailPageController.details[0].userId);
+                                  Get.to(() => UserAdvertisement());
+                                },
+                                child: Text(
+                                  'سایر آگهی های این کاربر',
+                                  style: TextStyle(color: Colors.red),
+                                )),
+                            Text(
+                              detailPageController.details[0].village +
+                                  ' ' +
+                                  detailPageController.details[0].datePosted
+                                      .trim(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: persianNumber,
+                                  fontSize: width / 31),
+                              textDirection: TextDirection.rtl,
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: height / 55,
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: width / 55),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${detailPageController.details[0].price} تومان',
+                                textDirection: TextDirection.ltr,
+                                style: TextStyle(
+                                    fontSize: width / 26,
+                                    fontFamily: persianNumber,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                              Text(
+                                getPriceTitle(),
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: width / 27),
+                              )
+                            ],
+                          ),
+                        ),
+                        Divider(),
+                        getAreaRealState(),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Container(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: width / 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: Get.height / 55,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                              onPressed: () async {
-                                await ap.getUserAdvertisement(userId);
-                                Get.to(() => UserAdvertisement());
-                              },
-                              child: Text(
-                                'سایر آگهی های این کاربر',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w300,
-                                    fontSize: Get.width / 26),
-                                textDirection: TextDirection.rtl,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                title,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: Get.width / 24),
-                                textDirection: TextDirection.rtl,
-                                overflow: TextOverflow.visible,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        sendedDate,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontFamily: 'IRANSansXFaNum',
-                            fontSize: Get.width / 31),
-                        textDirection: TextDirection.rtl,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          detailPageController.details[0].reportMessage != null
+                              ? TextButton(
+                                  onPressed: () {
+                                    showReportDialog(
+                                        context: context,
+                                        report: detailPageController
+                                            .details[0].reportMessage);
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Text('خواندن گزارش    '),
+                                      Icon(
+                                        CupertinoIcons
+                                            .exclamationmark_circle_fill,
+                                        color: Colors.red,
+                                      )
+                                    ],
+                                  ),
+                                )
+                              : Container(),
+                          Text(
+                            'توضیحات',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: width / 24),
+                          ),
+                        ],
                       ),
                       SizedBox(
-                        height: Get.height / 55,
+                        height: height / 55,
                       ),
-                      Divider(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: Get.width / 55),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '$price   تومان',
-                              textDirection: TextDirection.ltr,
-                              style: TextStyle(
-                                  fontSize: Get.width / 26,
-                                  fontFamily: 'IRANSansXFaNum',
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            Text(
-                              'قیمت',
-                              textDirection: TextDirection.rtl,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: Get.width / 27),
-                            )
-                          ],
+                      Container(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          detailPageController.details[0].description,
+                          maxLines: 7,
+                          overflow: TextOverflow.visible,
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: width / 28,
+                          ),
                         ),
-                      )
+                      ),
                     ],
-                  ),
-                ),
-              ),
-              Divider(),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Get.width / 30, vertical: Get.height / 55),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'توضیحات',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: Get.width / 24),
-                    ),
-                    SizedBox(
-                      height: Get.height / 55,
-                    ),
-                    Container(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        description,
-                        maxLines: 7,
-                        overflow: TextOverflow.visible,
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w300,
-                          fontSize: Get.width / 28,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: 8.0, vertical: Get.height / 50),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                MaterialButton(
-                  height: Get.width / 9,
-                  minWidth: Get.width / 2.2,
-                  elevation: 0,
-                  color: Colors.red.withOpacity(0.7),
-                  onPressed: () {
-                    advertisementProvider.rejectAdvertisement(this.adsId);
-
-                    Get.to(() => HomePage());
-                  },
-                  child: Text(
-                    'رد کردن',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: Get.width / 26,
-                    ),
-                  ),
-                ),
-                MaterialButton(
-                  height: Get.width / 9,
-                  minWidth: Get.width / 2.2,
-                  elevation: 0,
-                  color: Colors.greenAccent,
-                  onPressed: () async {
-                    advertisementProvider.changeToPublish(this.adsId);
-                    Get.to(() => HomePage());
-                  },
-                  child: Text(
-                    'تایید',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: Get.width / 26,
-                    ),
                   ),
                 ),
               ],
             ),
-          )
-        ],
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 8.0, vertical: height / 50),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      await advertisementProvider.rejectAdvertisement(
+                          detailPageController.details[0].id);
+                      Get.to(() => HomePage());
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: Get.width / 6, vertical: Get.width / 90),
+                      child: Text(
+                        'رد کردن',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        Colors.red.withOpacity(0.5),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      if (detailPageController.details[0].reportMessage ==
+                          null) {
+                        await advertisementProvider.changeToPublish(
+                            detailPageController.details[0].id);
+                      }
+                      if (detailPageController.details[0].reportMessage !=
+                          null) {
+                        await advertisementProvider.clearReport(
+                            id: detailPageController.details[0].id,
+                            context: context);
+                      }
+
+                      Get.to(() => HomePage());
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: Get.width / 6.0,
+                          vertical: Get.width / 90),
+                      child: Text(
+                        'تایید',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        Color.fromRGBO(10, 210, 71, 0.4),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -212,7 +271,7 @@ class AdsDetail extends StatelessWidget {
     return Stack(children: [
       ImageSlideshow(
         width: double.infinity,
-        height: Get.height / 3,
+        height: height / 3,
         initialPage: 0,
         indicatorColor: Colors.greenAccent,
         indicatorBackgroundColor: Colors.white,
@@ -220,23 +279,46 @@ class AdsDetail extends StatelessWidget {
           GestureDetector(
             onTap: () {
               Get.to(
-                () => FullscreenImage(image: byteImage1!),
+                () => FullscreenImageSlider(
+                  image1: detailPageController.details[0].photo1!,
+                  image2: detailPageController.details[0].photo2!,
+                ),
               );
             },
-            child: Image.memory(
-              base64Decode(byteImage1!),
-              fit: BoxFit.cover,
+            child: ShaderMask(
+              shaderCallback: (rect) {
+                return RadialGradient(
+                  colors: [Colors.transparent, Colors.white],
+                ).createShader(
+                    Rect.fromLTRB(-200, -200, Get.width / 2, Get.width / 2));
+              },
+              blendMode: BlendMode.dstIn,
+              child: Image.memory(
+                base64Decode(detailPageController.details[0].photo1!),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           GestureDetector(
             onTap: () {
               Get.to(
-                () => FullscreenImage(image: byteImage2!),
+                () => FullscreenImageSlider(
+                  image1: detailPageController.details[0].photo1!,
+                  image2: detailPageController.details[0].photo2!,
+                ),
               );
             },
-            child: Image.memory(
-              base64Decode(byteImage2!),
-              fit: BoxFit.cover,
+            child: ShaderMask(
+              shaderCallback: (rect) {
+                return RadialGradient(
+                  colors: [Colors.transparent, Colors.white],
+                ).createShader(Rect.fromLTRB(-200, -200, width / 2, width / 2));
+              },
+              blendMode: BlendMode.dstIn,
+              child: Image.memory(
+                base64Decode(detailPageController.details[0].photo2!),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ],
@@ -244,98 +326,23 @@ class AdsDetail extends StatelessWidget {
         isLoop: true,
       ),
       Container(
-        padding: EdgeInsets.only(top: Get.width / 12, left: Get.width / 45),
-        width: Get.width,
-        height: Get.height / 3,
+        padding: EdgeInsets.only(top: width / 12, left: width / 45),
+        width: width,
+        height: height / 3,
         alignment: Alignment.topLeft,
         child: GestureDetector(
-          onTap: () =>
-              Get.to(() => HomePage(), transition: Transition.noTransition),
-          child: Row(
-            children: [
-              Icon(
-                CupertinoIcons.back,
-                size: 25,
-                color: Colors.black,
-              ),
-              Text(
-                'بازگشت',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16),
-              )
-            ],
-          ),
-        ),
-      ),
-    ]);
-  }
-
-  Widget getImageOrEmpty() {
-    return (byteImage1 != null)
-        ? GestureDetector(
-            onTap: () {
-              Get.to(
-                () => FullscreenImage(image: byteImage1!),
-              );
-            },
-            child: Stack(children: [
-              Container(
-                height: Get.height / 2.5,
-                width: Get.width,
-                child: Image.memory(
-                  base64Decode(byteImage1!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Container(
-                padding:
-                    EdgeInsets.only(top: Get.width / 12, left: Get.width / 45),
-                width: Get.width,
-                height: Get.height / 2.5,
-                alignment: Alignment.topLeft,
-                child: GestureDetector(
-                  onTap: () => Get.to(() => HomePage(),
-                      transition: Transition.noTransition),
-                  child: Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.back,
-                        size: 25,
-                        color: Colors.black,
-                      ),
-                      Text(
-                        'بازگشت',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ]),
-          )
-        : getAppbarWithBack();
-  }
-
-  Widget getAppbarWithBack() {
-    return Container(
-      color: Colors.blue,
-      child: Padding(
-        padding: EdgeInsets.only(top: 40.0, bottom: 20),
-        child: Opacity(
-          opacity: 0.5,
-          child: GestureDetector(
-            onTap: () =>
-                Get.to(() => HomePage(), transition: Transition.noTransition),
+          onTap: () {
+            Get.back();
+          },
+          child: Container(
+            width: width / 5,
+            height: width / 9,
+            color: Colors.transparent,
             child: Row(
               children: [
                 Icon(
                   CupertinoIcons.back,
-                  size: 25,
+                  size: width / 20,
                   color: Colors.black,
                 ),
                 Text(
@@ -343,39 +350,200 @@ class AdsDetail extends StatelessWidget {
                   style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.w500,
-                      fontSize: 16),
+                      fontSize: width / 23),
                 )
               ],
             ),
           ),
         ),
       ),
+    ]);
+  }
+
+  showReportDialog({required context, required String report}) {
+    AlertDialog alert = AlertDialog(
+      backgroundColor: Colors.white,
+      elevation: 3,
+      content: Text(
+        report,
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: Get.width / 25,
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Get.back(closeOverlays: true);
+            },
+            child: Text(
+              'تایید',
+              style: TextStyle(
+                color: Colors.greenAccent,
+                fontWeight: FontWeight.w400,
+                fontSize: Get.width / 27,
+              ),
+            ))
+      ],
+    );
+    showDialog(
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      context: context,
     );
   }
 
-  Widget getStackedBackButton() {
-    return Padding(
-      padding: EdgeInsets.only(top: 40.0),
-      child: Opacity(
-        opacity: 0.7,
-        child: GestureDetector(
-          onTap: () =>
-              Get.to(() => HomePage(), transition: Transition.noTransition),
-          child: Container(
-            width: Get.width / 4,
+  Widget getImageOrEmpty() {
+    if (detailPageController.details[0].photo1 != null) {
+      return singleImage(detailPageController.details[0].photo1);
+    }
+
+    if (detailPageController.details[0].photo2 != null) {
+      return singleImage(detailPageController.details[0].photo2);
+    }
+
+    return getAppbarWithBack();
+  }
+
+  Widget singleImage(String? image) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(
+          () => FullscreenImage(image: image!),
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            height: height / 2.5,
+            width: width,
+            child: ShaderMask(
+              shaderCallback: (rect) {
+                return RadialGradient(
+                  colors: [Colors.transparent, Colors.white],
+                ).createShader(
+                    Rect.fromLTRB(-200, -200, Get.width / 2, Get.width / 2));
+              },
+              blendMode: BlendMode.dstIn,
+              child: Image.memory(
+                base64Decode(image!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+              padding: EdgeInsets.only(top: width / 12, left: width / 45),
+              width: width,
+              height: height / 2.5,
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                onTap: () {
+                  Get.back();
+                },
+                child: Container(
+                  width: width / 5,
+                  height: width / 9,
+                  color: Colors.transparent,
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.back,
+                        size: width / 20,
+                        color: Colors.black,
+                      ),
+                      Text(
+                        'بازگشت',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: width / 23),
+                      )
+                    ],
+                  ),
+                ),
+              ))
+        ],
+      ),
+    );
+  }
+
+  String getPriceTitle() {
+    if (detailPageController.details[0].adsType ==
+        AdsFormState.FOOD.toString().toLowerCase()) {
+      return 'قیمت';
+    }
+    if (detailPageController.details[0].adsType ==
+        AdsFormState.JOB.toString().toLowerCase()) {
+      return 'حقوق ماهیانه';
+    }
+
+    return 'قیمت کل';
+  }
+
+  Widget getAreaRealState() {
+    return (detailPageController.details[0].adsType ==
+            AdsFormState.REALSTATE.toString().toLowerCase())
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: width / 55),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${detailPageController.details[0].area} متر',
+                      textDirection: TextDirection.ltr,
+                      style: TextStyle(
+                          fontSize: width / 26,
+                          fontFamily: persianNumber,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    Text(
+                      "متراژ",
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: width / 27,
+                          fontFamily: persianNumber),
+                    )
+                  ],
+                ),
+              ),
+              Divider(),
+            ],
+          )
+        : Container();
+  }
+
+  Widget getAppbarWithBack() {
+    return Container(
+      color: Color.fromRGBO(8, 212, 76, 0.5),
+      child: Padding(
+        padding: EdgeInsets.only(top: 40.0, bottom: 20),
+        child: Opacity(
+          opacity: 0.5,
+          child: GestureDetector(
+            onTap: () {
+              Get.back();
+            },
             child: Row(
               children: [
                 Icon(
                   CupertinoIcons.back,
-                  size: 25,
-                  color: Colors.white,
+                  size: width / 20,
+                  color: Colors.black,
                 ),
                 Text(
                   'بازگشت',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.w500,
-                      fontSize: 16),
+                      fontSize: width / 23),
                 )
               ],
             ),
@@ -385,3 +553,5 @@ class AdsDetail extends StatelessWidget {
     );
   }
 }
+
+enum AdsFormState { REALSTATE, FOOD, JOB, Trap }

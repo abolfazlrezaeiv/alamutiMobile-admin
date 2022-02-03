@@ -1,4 +1,4 @@
-import 'package:alamuti/app/data/storage/cachemanager.dart';
+import 'package:admin_alamuti/app/data/storage/cachemanager.dart';
 import 'package:get/get.dart';
 
 class AuthenticationManager extends GetxController with CacheManager {
