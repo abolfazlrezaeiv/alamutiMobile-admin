@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 /// Basic layout for indicating that an exception occurred.
 class ExceptionIndicator extends StatelessWidget {

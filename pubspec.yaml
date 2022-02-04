@@ -24,25 +24,16 @@ dependencies:
   flutter:
     sdk: flutter
   get_storage: ^2.0.3
-  equatable: ^2.0.3
-  file_picker: ^4.2.7
   image_picker: ^0.8.4+4
   infinite_scroll_pagination: ^3.1.0
   signalr_core: ^1.1.1
-  flutter_chat_bubble: ^2.0.0
   chips_choice_null_safety: ^2.0.4
   flutter_image_slideshow: any
   argon_buttons_flutter: ^1.1.0
-  connectivity: ^3.0.6
-  http: ^0.13.4
   shared_preferences: ^2.0.8
-  flutter_svg: ^0.23.0+1
-  flutter_sfsymbols: ^2.0.0
   get: ^4.3.8
   dio: ^4.0.4
-  marquee: ^2.2.0
 
-  flutter_countdown_timer: ^4.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -128,9 +119,7 @@ flutter:
           weight: 800
         - asset: assets/fonts/IRANSansXFaNum-Black.ttf
           weight: 900
-    - family: sficonsets
-      fonts:
-        - asset: packages/flutter_sfsymbols/fonts/sficonsets.ttf
+   
   # fonts:
   #   - family: Schyler
   #     fonts:
