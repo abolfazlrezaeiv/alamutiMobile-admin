@@ -1,31 +1,45 @@
 import 'dart:async';
+import 'dart:convert';
+
 import 'package:admin_alamuti/app/data/model/login_request_model.dart';
 import 'package:admin_alamuti/app/data/model/login_response_model.dart';
 import 'package:admin_alamuti/app/data/model/register_request_model.dart';
 import 'package:admin_alamuti/app/data/model/register_response_model.dart';
-import 'package:admin_alamuti/app/data/provider/base_url.dart';
 import 'package:admin_alamuti/app/data/storage/cachemanager.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 class LoginProvider extends GetConnect with CacheManager {
-  final String loginUrl = baseLoginUrl + 'login';
+  final String loginUrl = 'https://alamuti.ir/api/auth/login';
 
-  final String registerUrl = baseLoginUrl + 'register';
+  final String registerUrl = 'https://alamuti.ir/api/auth/authenticate';
   final Dio dio = Dio();
 
   Future<LoginResponseModel?> fetchLogin(
       LoginRequestModel model, BuildContext context) async {
-    final response = await post(loginUrl, model.toJson());
+    var url = Uri.parse('https://alamuti.ir/api/auth/login');
+
+    var response = await http.post(
+      url,
+      body: jsonEncode(model),
+      headers: {
+        "Accept": "application/json",
+        "content-type": "application/json"
+      },
+    );
+
+    var body = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      print(response.body['token']);
-      print(response.body['refreshToken']);
-      return LoginResponseModel.fromJson(response.body);
+      print(body['token']);
+      print(body['refreshToken']);
+
+      return LoginResponseModel.fromJson(body);
     } else {
       var message = 'کد ورود اشتباه است ...';
-      showStatusDialog(context: context, message: message);
+
       return null;
     }
   }
@@ -33,25 +47,43 @@ class LoginProvider extends GetConnect with CacheManager {
   Future<RegisterResponseModel?> fetchRegister(
       RegisterRequestModel model, BuildContext context) async {
     try {
-      final response =
-          await post(registerUrl, model.toJson()).timeout(Duration(seconds: 6));
-
+      var url = Uri.parse('https://alamuti.ir/api/auth/authenticate');
+      print(url);
+      var response = await http.post(
+        url,
+        body: jsonEncode(model),
+        headers: {
+          "Accept": "application/json",
+          "content-type": "application/json"
+        },
+      ).timeout(Duration(seconds: 16));
+      print('=================register line 57');
+      var body = jsonDecode(response.body);
+      print(body);
       if (response.statusCode == 200) {
-        print('sucessful');
-        saveUserId(response.body['id']);
-        return RegisterResponseModel.fromJson(response.body);
+        print('successful');
+        await saveUserId(body['id']);
+
+        // Pushe.setCustomId(getUserId());
+
+        return RegisterResponseModel.fromJson(body);
       } else {
         var message = 'خطا در اتصال به اینترنت ...';
-        showStatusDialog(context: context, message: message);
         print('not successful');
 
         return null;
       }
-    } on TimeoutException catch (_) {
+    } on TimeoutException catch (e) {
       var message = 'خطا در اتصال به اینترنت ...';
-      showStatusDialog(context: context, message: message);
+      print(e);
+      print('==========');
+
       return null;
+    } catch (e) {
+      print(e);
+      print('=========');
     }
+    return null;
   }
 
   showStatusDialog({required context, required String message}) {

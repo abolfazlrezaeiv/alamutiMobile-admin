@@ -5,7 +5,6 @@ import 'package:admin_alamuti/app/controller/detail_page_advertisement.dart';
 import 'package:admin_alamuti/app/data/model/Advertisement.dart';
 import 'package:admin_alamuti/app/data/model/list_page.dart';
 import 'package:admin_alamuti/app/data/provider/token_provider.dart';
-import 'package:admin_alamuti/app/data/provider/base_url.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -17,12 +16,13 @@ class AdvertisementProvider {
   List<Advertisement> advertisementList = [];
 
   Future<void> rejectAdvertisement(int id) async {
-    await tokenProvider.api.delete(baseUrl + 'Advertisement/unpublished/$id');
+    await tokenProvider.api
+        .delete('https:/alamuti.ir/api/admin/advertisements/$id');
   }
 
   Future<void> changeToPublish(int id) async {
     await tokenProvider.api
-        .put(baseUrl + 'Advertisement/changeToPublished/$id');
+        .put('https:/alamuti.ir/api/admin/advertisements//$id');
   }
 
   Future<void> getDetails(
@@ -33,7 +33,7 @@ class AdvertisementProvider {
     showLoaderDialog(context);
 
     var response = await tokenProvider.api
-        .get(baseUrl + 'Advertisement/$id')
+        .get('https://alamuti.ir/api/admin/advertisements/{id}/$id')
         .whenComplete(() => Get.back());
 
     if (response.statusCode == 200) {
@@ -50,10 +50,10 @@ class AdvertisementProvider {
   }) async {
     advertisementList = [];
     var response = await tokenProvider.api
-        .get(baseUrl +
-            'Advertisement/adminpaneluseradvertisement?userId=$userId&PageNumber=$number&PageSize=$size')
+        .get(
+            'https:/alamuti.ir/api/admin/user-advertisements?userId=$userId&PageNumber=$number&PageSize=$size')
         .timeout(Duration(seconds: 5));
-
+    print('req');
     var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
     print(xPagination);
 
@@ -76,11 +76,11 @@ class AdvertisementProvider {
 
     try {
       response = await tokenProvider.api
-          .get(baseUrl +
-              'Advertisement/getUnpublished?pageNumber=$number&pageSize=$size')
+          .get(
+              'https://alamuti.ir/api/admin/advertisements?pageNumber=$number&pageSize=$size')
           .timeout(Duration(seconds: 7));
-
-      var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
+      print(response.headers);
+      var xPagination = jsonDecode(response.headers['pagination']![0]);
       print(xPagination);
 
       if (response.statusCode == 200) {
@@ -98,7 +98,7 @@ class AdvertisementProvider {
             itemList: advertisementList,
             grandTotalCount: xPagination['TotalCount']);
       }
-    } on TimeoutException catch (_) {
+    } on TimeoutException catch (e) {
       throw TimeoutException('');
     }
   }
@@ -113,15 +113,23 @@ class AdvertisementProvider {
     Response response;
 
     try {
-      response = await tokenProvider.api
-          .get(baseUrl +
-              'Advertisement/report?pageNumber=$number&pageSize=$size')
-          .timeout(Duration(seconds: 6));
+      print('reposrt0');
 
-      var xPagination = jsonDecode(response.headers['X-Pagination']![0]);
+      response = await tokenProvider.api
+          .get(
+              'https://alamuti.ir/api/admin/advertisements/reports?pageNumber=$number&pageSize=$size')
+          .timeout(Duration(seconds: 4));
+
+      print('reposrt22222');
+      var xPagination = jsonDecode(response.headers['pagination']![0]);
+      print('reposrt2');
+
       print(xPagination);
+      print('reposrt3');
 
       if (response.statusCode == 200) {
+        print('reposrt4');
+
         response.data.forEach(
           (element) {
             advertisementList.add(Advertisement.fromJson(element));
@@ -136,8 +144,9 @@ class AdvertisementProvider {
             itemList: advertisementList,
             grandTotalCount: xPagination['TotalCount']);
       }
-    } on TimeoutException catch (_) {
-      throw TimeoutException('');
+    } catch (e) {
+      print(e);
+      throw Exception('');
     }
   }
 
@@ -146,7 +155,7 @@ class AdvertisementProvider {
     required int id,
   }) async {
     var response = await tokenProvider.api.put(
-      baseUrl + 'Advertisement/report/$id',
+      'https://alamuti.ir/api/admin/reports/$id',
     );
     print('object');
     if (response.statusCode == 200) {

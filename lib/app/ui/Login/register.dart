@@ -131,9 +131,10 @@ class Registeration extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: TextButton(
                           style: ElevatedButton.styleFrom(
-                            primary: otpRequestController.isPhoneNumber.value
-                                ? Color.fromRGBO(141, 235, 172, 1)
-                                : Colors.grey.withOpacity(0.5),
+                            backgroundColor:
+                                otpRequestController.isPhoneNumber.value
+                                    ? Color.fromRGBO(141, 235, 172, 1)
+                                    : Colors.grey.withOpacity(0.5),
                           ),
                           onPressed: () async {
                             if (formKey.currentState?.validate() ?? false) {
